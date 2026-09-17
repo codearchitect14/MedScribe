@@ -1,0 +1,32 @@
+code,description,category,is_sample_only
+99213,Office or other outpatient visit established patient low to moderate complexity,Evaluation and management,true
+99214,Office or other outpatient visit established patient moderate complexity,Evaluation and management,true
+99203,Office or other outpatient visit new patient low complexity,Evaluation and management,true
+99204,Office or other outpatient visit new patient moderate complexity,Evaluation and management,true
+99385,Initial comprehensive preventive medicine visit age 18-39,Evaluation and management,true
+99395,Periodic comprehensive preventive medicine visit age 18-39,Evaluation and management,true
+G0439,Annual wellness visit subsequent visit,Preventive services,false
+G0438,Annual wellness visit initial visit,Preventive services,false
+G0008,Administration of influenza virus vaccine,Immunization administration,false
+G0009,Administration of pneumococcal vaccine,Immunization administration,false
+G0010,Administration of hepatitis B vaccine,Immunization administration,false
+80053,Comprehensive metabolic panel,Laboratory,true
+85025,Complete blood count with automated differential,Laboratory,true
+80061,Lipid panel,Laboratory,true
+83036,Hemoglobin A1C level,Laboratory,true
+81003,Urinalysis automated without microscopy,Laboratory,true
+93000,Electrocardiogram complete with interpretation and report,Cardiovascular procedures,true
+94640,Airway inhalation treatment for acute airway obstruction,Pulmonary procedures,true
+94010,Spirometry,Pulmonary procedures,true
+36415,Collection of venous blood by venipuncture,Laboratory,true
+90471,Immunization administration one vaccine,Immunization administration,false
+J1885,Injection ketorolac tromethamine per 15 mg,Injections,false
+J3420,Injection vitamin B12 cyanocobalamin up to 1000 mcg,Injections,false
+A9150,Non-prescription drug,Supplies,false
+E0424,Stationary oxygen concentrator,Durable medical equipment,false
+E0431,Portable oxygen concentrator,Durable medical equipment,false
+K0001,Standard wheelchair,Durable medical equipment,false
+L1902,Ankle orthosis,Orthotics,false
+20610,Arthrocentesis aspiration and or injection major joint or bursa,Musculoskeletal procedures,true
+17000,Destruction of premalignant lesion first lesion,Dermatologic procedures,true
+12001,Simple repair of superficial wounds of scalp neck axillae,Repair procedures,true

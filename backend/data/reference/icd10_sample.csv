@@ -1,0 +1,49 @@
+code,short_description,long_description,chapter,category
+E11.9,Type 2 diabetes mellitus without complications,Type 2 diabetes mellitus without complications,Endocrine nutritional and metabolic diseases,Diabetes mellitus
+E11.65,Type 2 diabetes mellitus with hyperglycemia,Type 2 diabetes mellitus with hyperglycemia,Endocrine nutritional and metabolic diseases,Diabetes mellitus
+E78.5,Hyperlipidemia unspecified,Hyperlipidemia unspecified,Endocrine nutritional and metabolic diseases,Metabolic disorders
+E03.9,Hypothyroidism unspecified,Hypothyroidism unspecified,Endocrine nutritional and metabolic diseases,Thyroid disorders
+E66.9,Obesity unspecified,Obesity unspecified,Endocrine nutritional and metabolic diseases,Obesity
+I10,Essential primary hypertension,Essential primary hypertension,Diseases of the circulatory system,Hypertensive diseases
+I25.10,Atherosclerotic heart disease of native coronary artery without angina pectoris,Atherosclerotic heart disease of native coronary artery without angina pectoris,Diseases of the circulatory system,Ischemic heart disease
+I48.91,Unspecified atrial fibrillation,Unspecified atrial fibrillation,Diseases of the circulatory system,Cardiac arrhythmias
+I50.9,Heart failure unspecified,Heart failure unspecified,Diseases of the circulatory system,Heart failure
+I63.9,Cerebral infarction unspecified,Cerebral infarction unspecified,Diseases of the circulatory system,Cerebrovascular disease
+J45.909,Unspecified asthma uncomplicated,Unspecified asthma uncomplicated,Diseases of the respiratory system,Asthma
+J44.9,Chronic obstructive pulmonary disease unspecified,Chronic obstructive pulmonary disease unspecified,Diseases of the respiratory system,COPD
+J06.9,Acute upper respiratory infection unspecified,Acute upper respiratory infection unspecified,Diseases of the respiratory system,Upper respiratory infection
+J18.9,Pneumonia unspecified organism,Pneumonia unspecified organism,Diseases of the respiratory system,Pneumonia
+J02.9,Acute pharyngitis unspecified,Acute pharyngitis unspecified,Diseases of the respiratory system,Pharyngitis
+K21.9,Gastro-esophageal reflux disease without esophagitis,Gastro-esophageal reflux disease without esophagitis,Diseases of the digestive system,GERD
+K29.70,Gastritis unspecified without bleeding,Gastritis unspecified without bleeding,Diseases of the digestive system,Gastritis
+K58.9,Irritable bowel syndrome without diarrhea,Irritable bowel syndrome without diarrhea,Diseases of the digestive system,IBS
+K59.00,Constipation unspecified,Constipation unspecified,Diseases of the digestive system,Constipation
+M54.5,Low back pain,Low back pain,Diseases of the musculoskeletal system,Back pain
+M25.50,Pain in unspecified joint,Pain in unspecified joint,Diseases of the musculoskeletal system,Joint pain
+M79.1,Myalgia,Myalgia,Diseases of the musculoskeletal system,Muscle pain
+M17.9,Osteoarthritis of knee unspecified,Osteoarthritis of knee unspecified,Diseases of the musculoskeletal system,Osteoarthritis
+M06.9,Rheumatoid arthritis unspecified,Rheumatoid arthritis unspecified,Diseases of the musculoskeletal system,Rheumatoid arthritis
+N39.0,Urinary tract infection site not specified,Urinary tract infection site not specified,Diseases of the genitourinary system,Urinary tract infection
+N18.3,Chronic kidney disease stage 3,Chronic kidney disease moderate stage 3,Diseases of the genitourinary system,Chronic kidney disease
+N40.0,Benign prostatic hyperplasia without lower urinary tract symptoms,Benign prostatic hyperplasia without lower urinary tract symptoms,Diseases of the genitourinary system,Prostate disorders
+F32.9,Major depressive disorder single episode unspecified,Major depressive disorder single episode unspecified,Mental and behavioral disorders,Depressive disorders
+F41.9,Anxiety disorder unspecified,Anxiety disorder unspecified,Mental and behavioral disorders,Anxiety disorders
+F41.1,Generalized anxiety disorder,Generalized anxiety disorder,Mental and behavioral disorders,Anxiety disorders
+F51.01,Primary insomnia,Primary insomnia,Mental and behavioral disorders,Sleep disorders
+G43.909,Migraine unspecified not intractable without status migrainosus,Migraine unspecified not intractable without status migrainosus,Diseases of the nervous system,Migraine
+G47.00,Insomnia unspecified,Insomnia unspecified,Diseases of the nervous system,Sleep disorders
+R51.9,Headache unspecified,Headache unspecified,Symptoms signs and abnormal findings,Headache
+R05.9,Cough unspecified,Cough unspecified,Symptoms signs and abnormal findings,Cough
+R50.9,Fever unspecified,Fever unspecified,Symptoms signs and abnormal findings,Fever
+R10.9,Unspecified abdominal pain,Unspecified abdominal pain,Symptoms signs and abnormal findings,Abdominal pain
+R42,Dizziness and giddiness,Dizziness and giddiness,Symptoms signs and abnormal findings,Dizziness
+R53.83,Other fatigue,Other fatigue,Symptoms signs and abnormal findings,Fatigue
+L20.9,Atopic dermatitis unspecified,Atopic dermatitis unspecified,Diseases of the skin,Dermatitis
+L30.9,Dermatitis unspecified,Dermatitis unspecified,Diseases of the skin,Dermatitis
+L03.90,Cellulitis unspecified,Cellulitis unspecified,Diseases of the skin,Cellulitis
+H66.90,Otitis media unspecified,Otitis media unspecified,Diseases of the ear,Otitis media
+H10.9,Unspecified conjunctivitis,Unspecified conjunctivitis,Diseases of the eye,Conjunctivitis
+Z00.00,Encounter for general adult medical examination without abnormal findings,Encounter for general adult medical examination without abnormal findings,Factors influencing health status,Preventive care
+Z23,Encounter for immunization,Encounter for immunization,Factors influencing health status,Immunization
+Z79.4,Long term current use of insulin,Long term current use of insulin,Factors influencing health status,Long term drug therapy
+Z79.899,Other long term current drug therapy,Other long term current drug therapy,Factors influencing health status,Long term drug therapy

@@ -1,0 +1,72 @@
+[
+  {
+    "patient_first_name": "Maria",
+    "patient_last_name": "Gonzalez",
+    "date_of_birth": "1968-04-12",
+    "sex": "female",
+    "raw_transcript": "Doctor: What brings you in today? Patient: I've had a cough and some chest tightness for about a week. Doctor: Any fever or shortness of breath? Patient: Low grade fever, no real shortness of breath. Doctor: Any history of asthma or COPD? Patient: No. Doctor: Let's listen to your lungs. I hear some mild wheezing on the right side. We'll start you on an inhaler and follow up in a week if it doesn't improve.",
+    "soap_note": {
+      "subjective": "Patient reports a one week history of cough and chest tightness with low grade fever. Denies shortness of breath. No history of asthma or COPD.",
+      "objective": "Mild wheezing auscultated on the right lung field. Vital signs stable.",
+      "assessment": "Acute bronchitis, likely viral, with mild reactive airway component.",
+      "plan": "Start albuterol inhaler as needed. Recommend rest and fluids. Follow up in one week if symptoms persist or worsen."
+    },
+    "specialty": "general medicine"
+  },
+  {
+    "patient_first_name": "James",
+    "patient_last_name": "Whitfield",
+    "date_of_birth": "1955-11-03",
+    "sex": "male",
+    "raw_transcript": "Doctor: How have your blood sugars been running? Patient: Mostly in the 150 to 180 range in the mornings. Doctor: Are you still taking metformin twice a day? Patient: Yes, and I've been trying to walk more. Doctor: Good. Your A1C today is 7.8, a slight improvement from last visit. Let's continue the current dose and recheck in three months. Also let's check your cholesterol today.",
+    "soap_note": {
+      "subjective": "Patient with type 2 diabetes reports morning glucose readings of 150 to 180. Compliant with metformin twice daily and increased physical activity.",
+      "objective": "Hemoglobin A1C 7.8 percent, improved from prior visit. Vital signs within normal limits.",
+      "assessment": "Type 2 diabetes mellitus, improving glycemic control.",
+      "plan": "Continue metformin at current dose. Obtain lipid panel today. Reinforce diet and exercise. Recheck A1C in three months."
+    },
+    "specialty": "endocrinology"
+  },
+  {
+    "patient_first_name": "Aisha",
+    "patient_last_name": "Bello",
+    "date_of_birth": "1990-07-22",
+    "sex": "female",
+    "raw_transcript": "Doctor: What's going on today? Patient: I've had lower back pain for about three days after lifting boxes at work. Doctor: Any numbness or tingling down your legs? Patient: No, just a dull ache in my lower back. Doctor: Let's examine you. No tenderness over the spine, some muscle tightness on the left side. I don't see any red flag signs. We'll treat this as a muscle strain.",
+    "soap_note": {
+      "subjective": "Patient reports three days of lower back pain following a lifting injury at work. Denies radiating pain, numbness, or tingling.",
+      "objective": "No spinal tenderness. Mild left paraspinal muscle tightness. Normal gait and reflexes.",
+      "assessment": "Acute lumbar muscle strain, no red flag findings.",
+      "plan": "Recommend over the counter NSAIDs, heat therapy, and activity modification. Return if symptoms worsen or if numbness or weakness develops."
+    },
+    "specialty": "orthopedics"
+  },
+  {
+    "patient_first_name": "David",
+    "patient_last_name": "Kim",
+    "date_of_birth": "1979-02-14",
+    "sex": "male",
+    "raw_transcript": "Doctor: How are you sleeping and how has your mood been? Patient: Not great. I've been having trouble sleeping and feeling down most days for the past month. Doctor: Any thoughts of harming yourself? Patient: No, nothing like that. Doctor: Any major life changes recently? Patient: I lost my job last month. Doctor: That's a significant stressor. Let's talk through some options including counseling and possibly medication.",
+    "soap_note": {
+      "subjective": "Patient reports one month of depressed mood and insomnia following recent job loss. Denies suicidal ideation.",
+      "objective": "Alert, oriented, appropriate affect. No acute distress observed during visit.",
+      "assessment": "Major depressive disorder, single episode, likely situational, related to recent job loss.",
+      "plan": "Refer to counseling. Discuss options for pharmacologic treatment at next visit if symptoms persist. Screen again with PHQ-9 in two weeks."
+    },
+    "specialty": "primary care behavioral health"
+  },
+  {
+    "patient_first_name": "Linda",
+    "patient_last_name": "Chen",
+    "date_of_birth": "1962-09-30",
+    "sex": "female",
+    "raw_transcript": "Doctor: How's your blood pressure been at home? Patient: I've been checking it, usually around 145 over 90. Doctor: Are you still on lisinopril? Patient: Yes, ten milligrams daily. Doctor: Given your readings, let's increase the dose to twenty milligrams and recheck in a month. Also let's review your diet, particularly sodium intake.",
+    "soap_note": {
+      "subjective": "Patient with hypertension reports home blood pressure readings averaging 145 over 90 while on lisinopril 10 mg daily.",
+      "objective": "Blood pressure in clinic 148 over 92. No peripheral edema.",
+      "assessment": "Essential hypertension, inadequately controlled on current dose.",
+      "plan": "Increase lisinopril to 20 mg daily. Counsel on sodium restriction. Recheck blood pressure in one month."
+    },
+    "specialty": "general medicine"
+  }
+]

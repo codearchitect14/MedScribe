@@ -1,0 +1,17 @@
+git_verify.md
+
+.env
+*.env
+!.env.example
+
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.pytest_cache/
+backend/*.egg-info/
+*.pyc
+
+frontend/node_modules/
+frontend/dist/
+
+.DS_Store
