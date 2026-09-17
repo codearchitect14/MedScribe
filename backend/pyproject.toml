@@ -24,6 +24,7 @@ dependencies = [
     "httpx==0.28.1",
     "structlog==24.4.0",
     "cryptography==44.0.0",
+    "faster-whisper==1.1.0",
 ]
 
 [project.optional-dependencies]
@@ -34,11 +35,15 @@ dev = [
     "mypy==1.14.0",
     "black==24.10.0",
     "isort==5.13.2",
+    "websockets==17.1",
 ]
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "session"
+markers = [
+    "slow: downloads model weights or otherwise takes longer than the rest of the suite",
+]
 
 [build-system]
 requires = ["hatchling"]

@@ -67,6 +67,38 @@ class Settings(BaseSettings):
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
     embedding_dimension: int = 384
 
+    # "tiny" for fast, low-resource batch transcription in Phase 4. Phase 5's
+    # live streaming path is expected to use "small" or "base" per plan.md.
+    whisper_model_size: str = "tiny"
+    whisper_device: str = "cpu"
+    whisper_compute_type: str = "int8"
+
+    # How many top candidates to retrieve per code table (ICD-10, HCPCS) via
+    # pgvector similarity search before sending them to the LLM for ranking.
+    coding_candidates_per_table: int = 5
+
+    # Live in-browser transcription (Phase 5). Reuses the same faster-whisper
+    # model configured above (whisper_model_size); production deployments
+    # wanting a different size/latency tradeoff for the live path than the
+    # batch upload path can split this into its own setting later.
+    live_transcription_enabled: bool = True
+    # Client audio must be raw 16-bit PCM, mono, at this sample rate.
+    live_sample_rate_hz: int = 16000
+    # How often (in seconds of newly buffered audio) to run a fresh partial
+    # transcription over the current segment.
+    live_partial_interval_seconds: float = 1.5
+    # How long a segment grows before it is treated as stable and finalized
+    # (appended to raw_transcript, buffer reset). This approximates "a stable
+    # sentence boundary" with a fixed time window rather than real VAD.
+    live_finalize_after_seconds: float = 8.0
+    # Safety cap: a segment is force-finalized at this length even if the
+    # partial/finalize cadence above would have run it longer.
+    live_max_segment_seconds: float = 20.0
+    # Concurrent live sessions actually running Whisper inference at once,
+    # across the whole process. Additional sessions queue rather than drop
+    # audio or block other requests. Defaults to CPU count.
+    live_worker_pool_size: int = 2
+
 
 @lru_cache
 def get_settings() -> Settings:
