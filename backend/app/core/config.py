@@ -29,6 +29,18 @@ class Settings(BaseSettings):
     csrf_secret: str = "change-me-too"
     field_encryption_key: str = ""
 
+    # "strict" (default) requires the frontend and backend to share one
+    # origin - true in local dev (Vite proxies the API, see
+    # frontend/vite.config.ts) and in any deployment that fronts both with
+    # one reverse-proxy domain. Set to "none" only for a deployment that
+    # puts the frontend and backend on genuinely different domains (e.g.
+    # a Vercel-hosted frontend calling a Render-hosted backend directly)
+    # with no proxy in front - browsers require Secure=true for
+    # SameSite=None, which this app already ties to ENVIRONMENT !=
+    # development, so this has no effect in local HTTP dev regardless of
+    # how it's set. See docs/deployment.md.
+    refresh_cookie_samesite: str = "strict"
+
     frontend_origin: str = "http://localhost:5173"
 
     login_rate_limit_attempts: int = 5
@@ -98,6 +110,24 @@ class Settings(BaseSettings):
     # across the whole process. Additional sessions queue rather than drop
     # audio or block other requests. Defaults to CPU count.
     live_worker_pool_size: int = 2
+
+    # Illustrative USD cost per 1,000 tokens, used only to compute an
+    # estimated LLM cost figure in the Phase 7 analytics rollups. Both
+    # providers are used on their free tiers in this reference build, so
+    # this defaults to 0; set it to a real published rate if you want the
+    # dashboard to project cost at paid-tier volume.
+    groq_cost_per_1k_tokens: float = 0.0
+    gemini_cost_per_1k_tokens: float = 0.0
+
+    # Rejects a request outright (413) before its body is read, if the
+    # client declares a Content-Length above this (plan.md Phase 9).
+    max_request_body_bytes: int = 50 * 1024 * 1024
+
+    # Optional error-tracking integration (plan.md Phase 9). Unset by
+    # default; sentry_sdk is only imported and initialized if this is set,
+    # so there is zero behavior change (and no new dependency requirement)
+    # for anyone who doesn't configure it.
+    sentry_dsn: str | None = None
 
 
 @lru_cache

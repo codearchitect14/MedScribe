@@ -1,7 +1,7 @@
 import httpx
 
 from app.core.config import get_settings
-from app.llm.adapters.base import ProviderAdapter, ProviderResponse
+from app.llm.adapters.base import ProviderAdapter, ProviderResponse, truncate_for_error
 from app.llm.exceptions import ProviderError, RateLimitExceededError
 
 
@@ -47,7 +47,7 @@ class GeminiAdapter(ProviderAdapter):
         if response.status_code == 429:
             raise RateLimitExceededError("Gemini rate limit exceeded")
         if response.status_code >= 400:
-            raise ProviderError(f"Gemini returned {response.status_code}: {response.text}")
+            raise ProviderError(f"Gemini returned {response.status_code}: {truncate_for_error(response.text)}")
 
         body = response.json()
         try:
@@ -55,7 +55,7 @@ class GeminiAdapter(ProviderAdapter):
             content = "".join(part["text"] for part in candidate["content"]["parts"])
             usage = body.get("usageMetadata", {})
         except (KeyError, IndexError) as exc:
-            raise ProviderError(f"Unexpected Gemini response shape: {body}") from exc
+            raise ProviderError(f"Unexpected Gemini response shape: {truncate_for_error(str(body))}") from exc
 
         return ProviderResponse(
             content=content,

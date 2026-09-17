@@ -60,12 +60,31 @@ services:
       - ./backend:/app
     command: celery -A app.worker worker --loglevel=info
 
+  beat:
+    build:
+      context: ./backend
+    container_name: medscribe-beat
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: celery -A app.worker beat --loglevel=info
+
   frontend:
     build:
       context: ./frontend
     container_name: medscribe-frontend
+    environment:
+      VITE_BACKEND_URL: http://backend:8000
     ports:
       - "5173:5173"
+    depends_on:
+      - backend
     volumes:
       - ./frontend:/app
       - /app/node_modules

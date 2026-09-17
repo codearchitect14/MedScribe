@@ -4,7 +4,8 @@ version = "0.1.0"
 description = "MedScribe AI backend: FastAPI service for clinical documentation automation"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi==0.115.6",
+    "fastapi==0.115.14",
+    "starlette==0.46.2",
     "uvicorn[standard]==0.34.0",
     "pydantic==2.10.4",
     "pydantic-settings==2.7.1",
@@ -16,15 +17,17 @@ dependencies = [
     "pgvector==0.3.6",
     "passlib[bcrypt]==1.7.4",
     "bcrypt==4.0.1",
-    "python-jose[cryptography]==3.3.0",
-    "python-multipart==0.0.20",
+    "python-jose[cryptography]==3.4.0",
+    "python-multipart==0.0.32",
     "celery==5.4.0",
     "redis==5.2.1",
     "sentence-transformers==3.3.1",
     "httpx==0.28.1",
     "structlog==24.4.0",
-    "cryptography==44.0.0",
+    "cryptography==44.0.1",
     "faster-whisper==1.1.0",
+    "openpyxl==3.1.5",
+    "sentry-sdk[fastapi]==2.19.2",
 ]
 
 [project.optional-dependencies]
@@ -36,6 +39,7 @@ dev = [
     "black==24.10.0",
     "isort==5.13.2",
     "websockets==17.1",
+    "pytest-cov==6.0.0",
 ]
 
 [tool.pytest.ini_options]

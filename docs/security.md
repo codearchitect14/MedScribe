@@ -9,7 +9,7 @@ This document covers authentication, authorization, encryption, and audit loggin
 - Passwords are hashed with bcrypt via passlib. Plaintext passwords are never stored.
 - A successful login issues:
   - A short-lived JWT access token (default 30 minutes, `ACCESS_TOKEN_EXPIRE_MINUTES`) returned in the response body. The frontend is expected to hold this in memory only, never in `localStorage`.
-  - A longer-lived JWT refresh token (default 7 days, `REFRESH_TOKEN_EXPIRE_DAYS`) set as an `httpOnly`, `secure` (outside development), `SameSite=Strict` cookie scoped to `/auth`.
+  - A longer-lived JWT refresh token (default 7 days, `REFRESH_TOKEN_EXPIRE_DAYS`) set as an `httpOnly`, `secure` (outside development), `SameSite=Strict` cookie scoped to `/auth`. `SameSite` is configurable (`REFRESH_COOKIE_SAMESITE`) for deployments that put the frontend and backend on different domains with no shared reverse-proxy origin - see `docs/deployment.md`.
   - A CSRF token, both returned in the response body and set as a non-`httpOnly` cookie, for the double-submit CSRF pattern described below.
 - `POST /auth/refresh` rotates the refresh token: it revokes the presented token's `jti` and issues a new access/refresh/CSRF token set. `POST /auth/logout` revokes the current refresh token's `jti` and clears both cookies.
 - Refresh token `jti` values are tracked in Redis (`app/services/token_store.py`) so they can be revoked before their natural JWT expiry, on both logout and rotation.

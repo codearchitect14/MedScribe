@@ -9,6 +9,7 @@ backend/__pycache__/
 backend/**/__pycache__/
 backend/.pytest_cache/
 backend/*.egg-info/
+backend/.coverage
 *.pyc
 
 frontend/node_modules/

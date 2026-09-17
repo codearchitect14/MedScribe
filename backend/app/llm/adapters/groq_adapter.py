@@ -1,7 +1,7 @@
 import httpx
 
 from app.core.config import get_settings
-from app.llm.adapters.base import ProviderAdapter, ProviderResponse
+from app.llm.adapters.base import ProviderAdapter, ProviderResponse, truncate_for_error
 from app.llm.exceptions import ProviderError, RateLimitExceededError
 
 
@@ -47,14 +47,14 @@ class GroqAdapter(ProviderAdapter):
         if response.status_code == 429:
             raise RateLimitExceededError("Groq rate limit exceeded")
         if response.status_code >= 400:
-            raise ProviderError(f"Groq returned {response.status_code}: {response.text}")
+            raise ProviderError(f"Groq returned {response.status_code}: {truncate_for_error(response.text)}")
 
         body = response.json()
         try:
             content = body["choices"][0]["message"]["content"]
             usage = body.get("usage", {})
         except (KeyError, IndexError) as exc:
-            raise ProviderError(f"Unexpected Groq response shape: {body}") from exc
+            raise ProviderError(f"Unexpected Groq response shape: {truncate_for_error(str(body))}") from exc
 
         return ProviderResponse(
             content=content,

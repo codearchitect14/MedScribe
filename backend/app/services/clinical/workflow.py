@@ -30,6 +30,7 @@ REVIEW_ALLOWED_FROM = {EncounterStatus.note_generated}
 FINALIZE_ALLOWED_FROM = {EncounterStatus.under_review}
 CODE_GENERATION_ALLOWED_FROM = {EncounterStatus.finalized}
 CODE_DECISION_ALLOWED_FROM = {EncounterStatus.coded, EncounterStatus.billed}
+BILLING_RECORD_CREATION_ALLOWED_FROM = {EncounterStatus.coded}
 
 
 def _require(encounter: Encounter, allowed: set[EncounterStatus], action: str) -> None:
@@ -66,3 +67,7 @@ def require_code_generation_allowed(encounter: Encounter) -> None:
 
 def require_code_decision_allowed(encounter: Encounter) -> None:
     _require(encounter, CODE_DECISION_ALLOWED_FROM, "accept or reject a code suggestion")
+
+
+def require_billing_record_creation_allowed(encounter: Encounter) -> None:
+    _require(encounter, BILLING_RECORD_CREATION_ALLOWED_FROM, "create a billing record")

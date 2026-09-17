@@ -1,29 +1,50 @@
 import uuid
+from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_client_ip, require_roles
 from app.core.db import get_db
+from app.core.query import paginate
 from app.core.security import hash_password
 from app.models.user import User, UserRole
 from app.schemas.auth import UserOut
+from app.schemas.pagination import Page, PageParams, pagination_params
 from app.schemas.user import InviteUserRequest, RoleChangeRequest
 from app.services.audit import log_audit_event
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+UserSort = Literal["created_at", "-created_at", "email", "-email"]
 
-@router.get("", response_model=list[UserOut])
+
+@router.get("", response_model=Page[UserOut])
 async def list_users(
+    role: UserRole | None = Query(default=None),
+    is_active: bool | None = Query(default=None),
+    sort: UserSort = Query(default="-created_at"),
+    page_params: PageParams = Depends(pagination_params),
     current_user: User = Depends(require_roles(UserRole.admin, UserRole.super_admin, UserRole.coder)),
     session: AsyncSession = Depends(get_db),
-) -> list[User]:
-    result = await session.execute(
-        select(User).where(User.organization_id == current_user.organization_id)
+) -> Page[UserOut]:
+    stmt = select(User).where(User.organization_id == current_user.organization_id)
+    if role is not None:
+        stmt = stmt.where(User.role == role)
+    if is_active is not None:
+        stmt = stmt.where(User.is_active == is_active)
+
+    sort_column = User.created_at if sort.lstrip("-") == "created_at" else User.email
+    stmt = stmt.order_by(sort_column.desc() if sort.startswith("-") else sort_column.asc())
+
+    items, total = await paginate(session, stmt, page_params)
+    return Page[UserOut](
+        items=[UserOut.model_validate(u) for u in items],
+        total=total,
+        page=page_params.page,
+        page_size=page_params.page_size,
     )
-    return list(result.scalars().all())
 
 
 @router.post("", response_model=UserOut, status_code=status.HTTP_201_CREATED)

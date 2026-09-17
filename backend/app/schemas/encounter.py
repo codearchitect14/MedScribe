@@ -6,11 +6,18 @@ from pydantic import BaseModel, Field
 from app.models.code_suggestion import CodeType
 from app.models.encounter import EncounterStatus
 from app.models.soap_note import SoapNoteStatus
+from app.schemas.billing import BillingRecordOut
+
+# Generous but bounded: rejects obviously-oversized payloads early rather
+# than accepting arbitrary request bodies (plan.md Phase 6 hardening).
+MAX_TRANSCRIPT_LENGTH = 50_000
+MAX_NOTE_FIELD_LENGTH = 5_000
+MAX_CARE_PLAN_LENGTH = 20_000
 
 
 class CreateEncounterRequest(BaseModel):
     patient_id: uuid.UUID
-    raw_transcript: str = Field(min_length=1)
+    raw_transcript: str = Field(min_length=1, max_length=MAX_TRANSCRIPT_LENGTH)
 
 
 class CreateLiveEncounterRequest(BaseModel):
@@ -47,10 +54,10 @@ class SoapNoteOut(BaseModel):
 
 
 class UpdateSoapNoteRequest(BaseModel):
-    subjective: str | None = None
-    objective: str | None = None
-    assessment: str | None = None
-    plan: str | None = None
+    subjective: str | None = Field(default=None, max_length=MAX_NOTE_FIELD_LENGTH)
+    objective: str | None = Field(default=None, max_length=MAX_NOTE_FIELD_LENGTH)
+    assessment: str | None = Field(default=None, max_length=MAX_NOTE_FIELD_LENGTH)
+    plan: str | None = Field(default=None, max_length=MAX_NOTE_FIELD_LENGTH)
 
 
 class CarePlanOut(BaseModel):
@@ -65,7 +72,7 @@ class CarePlanOut(BaseModel):
 
 
 class UpdateCarePlanRequest(BaseModel):
-    content: str = Field(min_length=1)
+    content: str = Field(min_length=1, max_length=MAX_CARE_PLAN_LENGTH)
 
 
 class CodeSuggestionOut(BaseModel):
@@ -89,3 +96,4 @@ class EncounterDetailOut(BaseModel):
     soap_note: SoapNoteOut | None
     care_plan: CarePlanOut | None
     code_suggestions: list[CodeSuggestionOut]
+    billing_record: BillingRecordOut | None

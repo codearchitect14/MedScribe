@@ -81,6 +81,25 @@ async def test_groq_adapter_raises_on_429(monkeypatch):
 
 
 @pytest.mark.asyncio(loop_scope="session")
+async def test_groq_adapter_error_message_truncates_long_response_body(monkeypatch):
+    """A provider's raw error body must never fully land in an exception
+    message unbounded (docs/data-flow-review.md): in the worst case it
+    could echo request content back."""
+    from app.llm.adapters import groq_adapter as module
+
+    monkeypatch.setattr(module.get_settings(), "groq_api_key", "test-key")
+    long_body = "x" * 5000
+    response = httpx.Response(400, text=long_body, request=httpx.Request("POST", "https://example.com"))
+    _patch_client(monkeypatch, module, response)
+
+    adapter = GroqAdapter()
+    with pytest.raises(ProviderError) as exc_info:
+        await adapter.complete(system_prompt="s", user_prompt="u", max_tokens=10)
+    assert len(str(exc_info.value)) < 500
+    assert "truncated" in str(exc_info.value)
+
+
+@pytest.mark.asyncio(loop_scope="session")
 async def test_groq_adapter_raises_without_api_key(monkeypatch):
     from app.llm.adapters import groq_adapter as module
 

@@ -2,21 +2,25 @@ import tempfile
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Literal
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_redis_client, require_roles
 from app.core.db import get_db
+from app.core.query import paginate
 from app.llm.gateway import GenerationContext
+from app.models.billing_record import BillingRecord
 from app.models.care_plan import CarePlan
 from app.models.code_suggestion import CodeSuggestion
 from app.models.encounter import Encounter, EncounterStatus
 from app.models.patient import Patient
 from app.models.soap_note import SoapNote, SoapNoteStatus
 from app.models.user import User, UserRole
+from app.schemas.billing import BillingRecordOut, CreateBillingRecordRequest, UpdateBillingRecordRequest
 from app.schemas.encounter import (
     CarePlanOut,
     CodeSuggestionDecisionRequest,
@@ -29,12 +33,15 @@ from app.schemas.encounter import (
     UpdateCarePlanRequest,
     UpdateSoapNoteRequest,
 )
+from app.schemas.pagination import Page, PageParams, pagination_params
+from app.schemas.tasks import BulkReprocessRequest, TaskSubmittedResponse
 from app.services.clinical import workflow
 from app.services.clinical.care_plan_service import generate_care_plan
 from app.services.clinical.coding_service import generate_code_suggestions
 from app.services.clinical.soap_note_service import generate_soap_note
 from app.services.clinical.transcript_cleaning import clean_transcript
 from app.services.clinical.transcription import transcribe_audio_file
+from app.tasks.bulk_reprocess import bulk_reprocess_encounters_task
 
 router = APIRouter(prefix="/encounters", tags=["encounters"])
 
@@ -63,6 +70,15 @@ async def _get_latest_soap_note(session: AsyncSession, encounter_id: uuid.UUID) 
 async def _get_latest_care_plan(session: AsyncSession, encounter_id: uuid.UUID) -> CarePlan | None:
     result = await session.execute(
         select(CarePlan).where(CarePlan.encounter_id == encounter_id).order_by(CarePlan.generated_at.desc())
+    )
+    return result.scalars().first()
+
+
+async def _get_latest_billing_record(session: AsyncSession, encounter_id: uuid.UUID) -> BillingRecord | None:
+    result = await session.execute(
+        select(BillingRecord)
+        .where(BillingRecord.encounter_id == encounter_id)
+        .order_by(BillingRecord.created_at.desc())
     )
     return result.scalars().first()
 
@@ -160,6 +176,7 @@ async def get_encounter(
     encounter = await _get_authorized_encounter(encounter_id, current_user, session)
     soap_note = await _get_latest_soap_note(session, encounter_id)
     care_plan = await _get_latest_care_plan(session, encounter_id)
+    billing_record = await _get_latest_billing_record(session, encounter_id)
     codes_result = await session.execute(
         select(CodeSuggestion).where(CodeSuggestion.encounter_id == encounter_id)
     )
@@ -167,20 +184,40 @@ async def get_encounter(
         encounter=EncounterOut.model_validate(encounter),
         soap_note=SoapNoteOut.model_validate(soap_note) if soap_note else None,
         care_plan=CarePlanOut.model_validate(care_plan) if care_plan else None,
+        billing_record=BillingRecordOut.model_validate(billing_record) if billing_record else None,
         code_suggestions=[CodeSuggestionOut.model_validate(c) for c in codes_result.scalars().all()],
     )
 
 
-@router.get("", response_model=list[EncounterOut])
+EncounterSort = Literal["created_at", "-created_at"]
+
+
+@router.get("", response_model=Page[EncounterOut])
 async def list_encounters(
+    status_filter: EncounterStatus | None = Query(default=None, alias="status"),
+    patient_id: uuid.UUID | None = Query(default=None),
+    sort: EncounterSort = Query(default="-created_at"),
+    page_params: PageParams = Depends(pagination_params),
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
-) -> list[Encounter]:
-    query = select(Encounter).where(Encounter.organization_id == current_user.organization_id)
+) -> Page[EncounterOut]:
+    stmt = select(Encounter).where(Encounter.organization_id == current_user.organization_id)
     if current_user.role == UserRole.clinician:
-        query = query.where(Encounter.clinician_id == current_user.id)
-    result = await session.execute(query.order_by(Encounter.created_at.desc()))
-    return list(result.scalars().all())
+        stmt = stmt.where(Encounter.clinician_id == current_user.id)
+    if status_filter is not None:
+        stmt = stmt.where(Encounter.status == status_filter)
+    if patient_id is not None:
+        stmt = stmt.where(Encounter.patient_id == patient_id)
+
+    stmt = stmt.order_by(Encounter.created_at.asc() if sort == "created_at" else Encounter.created_at.desc())
+
+    items, total = await paginate(session, stmt, page_params)
+    return Page[EncounterOut](
+        items=[EncounterOut.model_validate(e) for e in items],
+        total=total,
+        page=page_params.page,
+        page_size=page_params.page_size,
+    )
 
 
 @router.post("/{encounter_id}/soap-note", response_model=SoapNoteOut, status_code=status.HTTP_201_CREATED)
@@ -338,3 +375,84 @@ async def decide_code_suggestion(
     await session.commit()
     await session.refresh(suggestion)
     return suggestion
+
+
+@router.post(
+    "/{encounter_id}/billing-record", response_model=BillingRecordOut, status_code=status.HTTP_201_CREATED
+)
+async def create_billing_record(
+    encounter_id: uuid.UUID,
+    payload: CreateBillingRecordRequest,
+    current_user: User = Depends(require_roles(*CAN_DECIDE_CODES)),
+    session: AsyncSession = Depends(get_db),
+) -> BillingRecord:
+    encounter = await _get_authorized_encounter(encounter_id, current_user, session)
+    workflow.require_billing_record_creation_allowed(encounter)
+
+    record = BillingRecord(
+        encounter_id=encounter.id,
+        codes_applied=payload.codes_applied,
+        estimated_reimbursement=payload.estimated_reimbursement,
+        payer=payload.payer,
+    )
+    session.add(record)
+
+    encounter.status = EncounterStatus.billed
+    session.add(encounter)
+
+    await session.commit()
+    await session.refresh(record)
+    return record
+
+
+@router.patch("/{encounter_id}/billing-record/{record_id}", response_model=BillingRecordOut)
+async def update_billing_record(
+    encounter_id: uuid.UUID,
+    record_id: uuid.UUID,
+    payload: UpdateBillingRecordRequest,
+    current_user: User = Depends(require_roles(*CAN_DECIDE_CODES)),
+    session: AsyncSession = Depends(get_db),
+) -> BillingRecord:
+    await _get_authorized_encounter(encounter_id, current_user, session)
+
+    record = await session.get(BillingRecord, record_id)
+    if record is None or record.encounter_id != encounter_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Billing record not found")
+
+    if payload.billed_amount is not None:
+        record.billed_amount = payload.billed_amount
+    if payload.payer is not None:
+        record.payer = payload.payer
+    if payload.status is not None:
+        record.status = payload.status
+
+    await session.commit()
+    await session.refresh(record)
+    return record
+
+
+@router.post("/bulk-reprocess", response_model=TaskSubmittedResponse, status_code=status.HTTP_202_ACCEPTED)
+async def bulk_reprocess_encounters(
+    payload: BulkReprocessRequest,
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.super_admin)),
+    session: AsyncSession = Depends(get_db),
+) -> TaskSubmittedResponse:
+    """Regenerates SOAP notes for a batch of historical encounters in the
+    background (Celery), rather than inline, since a batch of LLM calls can
+    easily exceed a normal HTTP request timeout."""
+    owned = await session.execute(
+        select(Encounter.id).where(
+            Encounter.id.in_(payload.encounter_ids),
+            Encounter.organization_id == current_user.organization_id,
+        )
+    )
+    owned_ids = {row[0] for row in owned.all()}
+    unauthorized = [str(eid) for eid in payload.encounter_ids if eid not in owned_ids]
+    if unauthorized:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Encounter(s) not found in your organization: {', '.join(unauthorized)}",
+        )
+
+    task = bulk_reprocess_encounters_task.delay([str(eid) for eid in payload.encounter_ids])
+    return TaskSubmittedResponse(task_id=task.id)

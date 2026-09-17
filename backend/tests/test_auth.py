@@ -229,5 +229,7 @@ async def test_organization_isolation(org_and_users):
         headers = {"Authorization": f"Bearer {tokens['access_token']}"}
         listing = await client.get("/users", headers=headers)
         assert listing.status_code == 200
-        emails_seen = {u["email"] for u in listing.json()}
+        body = listing.json()
+        assert "total" in body and "page" in body
+        emails_seen = {u["email"] for u in body["items"]}
         assert other_admin_email not in emails_seen
