@@ -10,7 +10,7 @@ from app.main import app
 async def test_oversized_content_length_rejected_before_body_is_read():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post(
-            "/contact",
+            "/contact-requests",
             content=b"x",
             headers={"Content-Length": str(100 * 1024 * 1024), "Content-Type": "application/json"},
         )

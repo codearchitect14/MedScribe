@@ -44,7 +44,7 @@ async def test_submit_contact_inquiry_and_validation():
     _require_db()
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post(
-            "/contact",
+            "/contact-requests",
             json={
                 "name": "Jane Prospect",
                 "email": "jane@example-medscribe.com",
@@ -58,7 +58,7 @@ async def test_submit_contact_inquiry_and_validation():
         assert "id" in body
 
         invalid = await client.post(
-            "/contact",
+            "/contact-requests",
             json={"name": "", "email": "not-an-email", "message": ""},
         )
         assert invalid.status_code == 422
@@ -74,7 +74,7 @@ async def test_contact_inquiry_rate_limited_per_ip():
         }
         statuses = []
         for _ in range(6):
-            response = await client.post("/contact", json=payload)
+            response = await client.post("/contact-requests", json=payload)
             statuses.append(response.status_code)
         assert statuses[:5] == [201] * 5
         assert statuses[5] == 429
@@ -115,13 +115,13 @@ async def test_list_contact_inquiries_requires_super_admin():
             "/auth/login", data={"username": admin_email, "password": "TestPass123!"}
         )
         admin_headers = {"Authorization": f"Bearer {admin_login.json()['access_token']}"}
-        forbidden = await client.get("/contact", headers=admin_headers)
+        forbidden = await client.get("/contact-requests", headers=admin_headers)
         assert forbidden.status_code == 403
 
         super_admin_login = await client.post(
             "/auth/login", data={"username": super_admin_email, "password": "TestPass123!"}
         )
         super_admin_headers = {"Authorization": f"Bearer {super_admin_login.json()['access_token']}"}
-        allowed = await client.get("/contact", headers=super_admin_headers)
+        allowed = await client.get("/contact-requests", headers=super_admin_headers)
         assert allowed.status_code == 200
         assert "items" in allowed.json()

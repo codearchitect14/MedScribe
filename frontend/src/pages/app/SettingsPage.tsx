@@ -18,6 +18,7 @@ import { FieldGroup, Input, Label, Select } from "../../components/ui/Input"
 import { Badge } from "../../components/ui/Badge"
 import { Tabs } from "../../components/ui/Tabs"
 import { Alert } from "../../components/ui/Alert"
+import { useAuth } from "../../lib/AuthContext"
 import type { UserRole } from "../../types/api"
 
 export function SettingsPage() {
@@ -77,6 +78,7 @@ function OrganizationSection() {
 
 function UsersSection() {
   const queryClient = useQueryClient()
+  const { user: currentUser } = useAuth()
   const [showInvite, setShowInvite] = useState(false)
   const { data } = useQuery({ queryKey: ["users"], queryFn: () => listUsers({ page: 1 }) })
 
@@ -175,16 +177,22 @@ function UsersSection() {
                   <td className="px-6 py-3 font-medium text-ink-900">{user.full_name}</td>
                   <td className="px-6 py-3 text-ink-500">{user.email}</td>
                   <td className="px-6 py-3">
-                    <Select
-                      value={user.role}
-                      onChange={(e) => roleMutation.mutate({ userId: user.id, role: e.target.value as UserRole })}
-                      className="!w-auto py-1 text-xs"
-                    >
-                      <option value="clinician">Clinician</option>
-                      <option value="coder">Coder</option>
-                      <option value="admin">Admin</option>
-                      <option value="super_admin">Super admin</option>
-                    </Select>
+                    {user.id === currentUser?.id ? (
+                      <Badge tone="brand" className="capitalize">
+                        {user.role.replace("_", " ")}
+                      </Badge>
+                    ) : (
+                      <Select
+                        value={user.role}
+                        onChange={(e) => roleMutation.mutate({ userId: user.id, role: e.target.value as UserRole })}
+                        className="!w-auto py-1 text-xs"
+                      >
+                        <option value="clinician">Clinician</option>
+                        <option value="coder">Coder</option>
+                        <option value="admin">Admin</option>
+                        <option value="super_admin">Super admin</option>
+                      </Select>
+                    )}
                   </td>
                   <td className="px-6 py-3">
                     <Badge tone={user.is_active ? "success" : "neutral"}>
@@ -192,7 +200,7 @@ function UsersSection() {
                     </Badge>
                   </td>
                   <td className="px-6 py-3 text-right">
-                    {user.is_active && (
+                    {user.is_active && user.id !== currentUser?.id && (
                       <button
                         onClick={() => deactivateMutation.mutate(user.id)}
                         className="text-xs font-medium text-rose-600 hover:text-rose-700"

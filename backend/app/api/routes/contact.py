@@ -11,7 +11,7 @@ from app.models.user import User, UserRole
 from app.schemas.contact import ContactInquiryOut, CreateContactInquiryRequest
 from app.schemas.pagination import Page, PageParams, pagination_params
 
-router = APIRouter(prefix="/contact", tags=["contact"])
+router = APIRouter(prefix="/contact-requests", tags=["contact"])
 
 RATE_LIMIT_MAX_PER_HOUR = 5
 

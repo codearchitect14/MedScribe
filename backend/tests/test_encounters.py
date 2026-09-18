@@ -332,3 +332,54 @@ async def test_clinician_cannot_see_another_clinicians_encounter(org_and_users, 
 
         same_org_other_clinician = await client.get(f"/encounters/{encounter_id}", headers=other_headers)
         assert same_org_other_clinician.status_code == 404
+
+
+class _AllProvidersFailAdapter:
+    """Every call raises, simulating no LLM provider configured/reachable -
+    the exact condition that used to surface as a bare, undocumented 500
+    (found via live end-to-end testing) instead of a clean, actionable
+    error. See app/core/error_handlers.py::llm_unavailable_handler."""
+
+    name = "groq"
+
+    async def complete(self, *, system_prompt, user_prompt, max_tokens, json_mode=True):
+        from app.llm.exceptions import ProviderError
+
+        raise ProviderError("no provider configured")
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_generation_endpoint_returns_clean_503_when_no_llm_provider_available(
+    org_and_users, monkeypatch
+):
+    from app.llm import gateway
+
+    monkeypatch.setitem(gateway.ADAPTERS, "groq", _AllProvidersFailAdapter())
+    monkeypatch.setitem(gateway.ADAPTERS, "gemini", _AllProvidersFailAdapter())
+
+    users = org_and_users["users"]
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        clinician_token = await _login(client, users["clinician"]["email"], users["clinician"]["password"])
+        clinician_headers = {"Authorization": f"Bearer {clinician_token}"}
+
+        patient = await client.post(
+            "/patients",
+            json={"first_name": "Alex", "last_name": "Unavailable"},
+            headers=clinician_headers,
+        )
+        patient_id = patient.json()["id"]
+        encounter = await client.post(
+            "/encounters",
+            json={"patient_id": patient_id, "raw_transcript": "Doctor: hello. Patient: hi."},
+            headers=clinician_headers,
+        )
+        encounter_id = encounter.json()["id"]
+
+        soap = await client.post(f"/encounters/{encounter_id}/soap-note", headers=clinician_headers)
+
+        # No stack trace, no raw exception text - a 503 the client can act on.
+        assert soap.status_code == 503, soap.text
+        body = soap.json()
+        assert "request_id" in body
+        assert "Traceback" not in body["detail"]
+        assert "temporarily unavailable" in body["detail"].lower()

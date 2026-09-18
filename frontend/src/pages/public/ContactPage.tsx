@@ -19,7 +19,7 @@ export function ContactPage() {
     setStatus("submitting")
     setErrorMessage("")
     try {
-      await apiRequest("/contact", {
+      await apiRequest("/contact-requests", {
         method: "POST",
         body: { name, email, organization_name: organization || null, message },
         skipAuthRetry: true,

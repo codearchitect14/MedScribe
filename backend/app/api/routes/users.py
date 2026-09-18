@@ -90,6 +90,12 @@ async def change_user_role(
     current_user: User = Depends(require_roles(UserRole.admin, UserRole.super_admin)),
     session: AsyncSession = Depends(get_db),
 ) -> User:
+    if user_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot change your own role. Ask another admin to do this.",
+        )
+
     user = await session.get(User, user_id)
     if user is None or user.organization_id != current_user.organization_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -118,6 +124,12 @@ async def deactivate_user(
     current_user: User = Depends(require_roles(UserRole.admin, UserRole.super_admin)),
     session: AsyncSession = Depends(get_db),
 ) -> User:
+    if user_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot deactivate your own account. Ask another admin to do this.",
+        )
+
     user = await session.get(User, user_id)
     if user is None or user.organization_id != current_user.organization_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

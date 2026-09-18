@@ -10,6 +10,13 @@ import { defineConfig, loadEnv, type ProxyOptions } from 'vite'
 // origin), which breaks the silent-refresh-on-reload flow. Proxying mirrors
 // how this would be deployed for real too - frontend and backend behind one
 // origin via a reverse proxy - rather than special-casing dev.
+// Every prefix here must be a path no public frontend page also owns: this
+// list is matched against the raw request path before React Router ever
+// sees it, so a collision (e.g. an API resource at the same path as a
+// marketing page) silently serves the API's JSON instead of the page on a
+// direct visit or hard refresh. That's why the contact API lives at
+// /contact-requests rather than /contact - the public site's own /contact
+// page would otherwise never render server-side.
 const BACKEND_ROUTE_PREFIXES = [
   '/auth',
   '/users',
@@ -20,7 +27,7 @@ const BACKEND_ROUTE_PREFIXES = [
   '/tasks',
   '/reimbursement-rates',
   '/analytics',
-  '/contact',
+  '/contact-requests',
   '/health',
 ]
 
