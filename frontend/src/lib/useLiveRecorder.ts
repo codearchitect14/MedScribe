@@ -22,6 +22,24 @@ export type LiveRecorderStatus =
 
 const LIVE_SAMPLE_RATE = 16000
 
+function describeCaptureError(err: unknown): string {
+  if (err instanceof DOMException) {
+    if (err.name === "NotAllowedError") {
+      return "Microphone access was denied. Allow microphone access for this site and try again."
+    }
+    if (err.name === "NotFoundError") {
+      return "No microphone was found on this device."
+    }
+    if (err.name === "NotReadableError") {
+      return "The microphone is already in use by another application."
+    }
+  }
+  if (err instanceof Error && err.message) {
+    return `Could not start audio capture: ${err.message}`
+  }
+  return "Could not start audio capture."
+}
+
 export function useLiveRecorder(encounterId: string | null) {
   const [status, setStatus] = useState<LiveRecorderStatus>("idle")
   const [partialText, setPartialText] = useState("")
@@ -69,7 +87,19 @@ export function useLiveRecorder(encounterId: string | null) {
         setStatus("queued")
       } else if (message.type === "ready") {
         setStatus("recording")
-        await startCapture(ws)
+        try {
+          await startCapture(ws)
+        } catch (err) {
+          // getUserMedia (permission denied, no microphone, insecure
+          // context) or audioWorklet.addModule can reject here. Previously
+          // this was unhandled: the status was already set to "recording"
+          // above, so the UI stayed on "Listening..." forever with no
+          // error and no way to know capture never actually started.
+          setStatus("error")
+          setErrorMessage(describeCaptureError(err))
+          cleanupAudio()
+          ws.close()
+        }
       } else if (message.type === "partial") {
         setPartialText(message.text)
       } else if (message.type === "final") {

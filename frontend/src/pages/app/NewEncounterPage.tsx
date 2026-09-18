@@ -175,6 +175,7 @@ export function NewEncounterPage() {
                 liveEncounterId={liveEncounterId}
                 onCreateEncounter={() => liveEncounterMutation.mutate()}
                 creating={liveEncounterMutation.isPending}
+                createError={liveEncounterMutation.error}
                 recorder={recorder}
               />
             )}
@@ -232,12 +233,14 @@ function LiveRecordingPanel({
   liveEncounterId,
   onCreateEncounter,
   creating,
+  createError,
   recorder,
 }: {
   hasPatient: boolean
   liveEncounterId: string | null
   onCreateEncounter: () => void
   creating: boolean
+  createError: unknown
   recorder: ReturnType<typeof useLiveRecorder>
 }) {
   if (!liveEncounterId) {
@@ -247,6 +250,10 @@ function LiveRecordingPanel({
           This will request microphone access and stream audio for live transcription. Make sure you have
           patient consent to record before starting.
         </p>
+        {!hasPatient && (
+          <p className="mb-4 text-sm font-medium text-amber-600">Select a patient above to enable recording.</p>
+        )}
+        {createError != null && <ErrorAlert error={createError} />}
         <Button disabled={!hasPatient} loading={creating} onClick={onCreateEncounter} size="lg">
           <Mic className="h-4 w-4" />
           Start recording
@@ -330,7 +337,15 @@ function LiveRecordingPanel({
         </div>
       )}
 
-      {recorder.status === "error" && <Alert tone="error">{recorder.errorMessage}</Alert>}
+      {recorder.status === "error" && (
+        <div className="text-center">
+          <Alert tone="error">{recorder.errorMessage}</Alert>
+          <Button className="mt-4" onClick={recorder.start}>
+            <Mic className="h-4 w-4" />
+            Try again
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
